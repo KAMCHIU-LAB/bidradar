@@ -11,3 +11,9 @@ credentials.json
 *.sqlite*
 *.log
 .DS_Store
+.codex/
+.omx/
+/digests/
+/reviews/
+/quality/
+/quarantine/

@@ -1,5 +1,7 @@
 # 运行说明
 
+首次使用先运行 `init`，检查私有配置的模型是否可用，再用 `collect`、`brief` 生成本地预览。此阶段可以保留飞书凭证为空；发送、连接确认和安装自动任务需要飞书配置。
+
 ## 常用命令
 
 | 操作 | 命令 | 是否调用AI |
@@ -7,17 +9,21 @@
 | 采集全部来源 | `python3 bidradar.py collect` | 否 |
 | 重试一个配置来源 | `python3 bidradar.py collect --source <来源ID>` | 否 |
 | 生成并独立复审简报 | `python3 bidradar.py brief` | 是；当前成稿及复审均命中缓存时为零 |
+| 仅缓存配置中的每日RSS | `python3 bidradar.py capture` | 否 |
 | 重新保存阅读预览 | `python3 bidradar.py digest` | 否 |
 | 检查篇幅、引用、评分和复审 | `python3 bidradar.py quality` | 否 |
 | 查看采集、预算与投递状态 | `python3 bidradar.py status` | 否 |
 | 搜索本地资料 | `python3 bidradar.py search --query generative` | 否 |
 | 查看逐篇初筛归档 | `python3 bidradar.py library` | 否 |
 | 逐篇初筛 | `python3 bidradar.py review --limit 2` | 是；仍受每日预算约束 |
-| 完整处理当前窗口 | `python3 bidradar.py run` | 是；可能发送通知 |
+| 给资料打标签 | `python3 bidradar.py feedback --id <资料ID> --label <标签>` | 否；标签进入后续模型输入 |
+| 完整处理当前窗口 | `python3 bidradar.py run` | 连接确认后可能调用并发送；未连接时仅采集 |
 | 检查周期并执行到期任务 | `python3 bidradar.py scheduled-run` | 到期后可能调用 |
 | 解除定时任务 | `python3 bidradar.py uninstall-schedule` | 否 |
 
-`brief`、`digest`和`quality`默认重新打开最近一次调度窗口，便于复查同一份简报。`run`处理当前窗口并绕过周期日期限制。
+`brief`、`digest`和`quality`默认重新打开最近一次调度窗口，便于复查同一份简报。尚无调度窗口时，复用最近一次手动采集的固定窗口；再次执行 `collect` 会更新该手动窗口。`run`处理当前窗口并绕过周期日期限制。
+
+除 `init` 外，命令都要加载私有配置并打开本地状态库。“不调用AI”不表示完全不读写本机状态。标签可用值通过 `python3 bidradar.py --help` 查看；只想了解输出时，可直接阅读 [公开样例](../examples/brief.md)。
 
 ## 预览和依据在哪
 
@@ -35,7 +41,7 @@ macOS可以在访达中按 `Shift + Command + G`，粘贴上述运行目录。�
 
 ## 调用预算
 
-自动周期与每日均最多6次模型调用，两个上限同时生效，失败同样计数。默认不做额外逐篇初筛。启用时最多2篇，须为生成、复审、一次修订及再次复审预留4次。
+默认每日与每自动周期各最多6次模型调用，两项上限均取 `[review].daily_limit`，分别累计、同时生效；恢复任务不重置周期累计，失败同样计数。默认不做额外逐篇初筛。启用时最多2篇，须为生成、复审、一次修订及再次复审预留4次。
 
 `brief --evaluation-calls 4`是显式的额外验收入口，使用独立的一次性持久预算；再次运行或跨日均不会刷新。只有在用户明确同意额外消耗时使用。`--fallback-model gpt-6-luna`仅用于该验收入口遇到额度错误后的尝试，失败也占名额。模型可用性取决于实际账号。
 
@@ -72,4 +78,4 @@ macOS使用 `launchd`。安装后每天09:00检查，实际执行日期加15天�
 
 ## 公开仓库边界
 
-仓库只包含源码、结构定义、虚构测试、配置模板和使用说明。不要提交私有配置、真实Webhook或签名密钥、数据库、运行归档、个人备注、认证文件或商业代码。`.gitignore`只能辅助防误提交，发布前仍须检查暂存文件及提交作者邮箱。
+仓库只包含源码、结构定义、虚构检查资料、配置模板、公开资料简报样例和使用说明。不要提交私有配置、真实Webhook或签名密钥、数据库、原始运行归档、个人备注、认证文件或商业代码。`.gitignore`只能辅助防误提交，发布前仍须检查暂存文件及提交作者邮箱。

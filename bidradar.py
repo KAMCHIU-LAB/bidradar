@@ -1743,16 +1743,20 @@ def install_schedule(db, cfg):
 
 
 def preview_window(db, cfg):
-    """Reopen the last scheduled window for reproducible previews and quality checks."""
-    state = db.execute("SELECT value FROM meta WHERE key='schedule_state'").fetchone()
-    if state and not cfg.get('_window_end'):
-        window = json.loads(state['value'])
-        if window.get('window_start') and window.get('window_end'):
-            return {**cfg, '_window_start': window['window_start'], '_window_end': window['window_end']}
-    if not cfg.get('_window_end'):
-        start, end = window_bounds(cfg)
-        return {**cfg, '_window_start': start, '_window_end': end}
-    return cfg
+    """Reopen a fixed scheduled or manual window across preview commands."""
+    if cfg.get('_window_end'):
+        return cfg
+    for key in ('schedule_state', 'manual_preview_window'):
+        state = db.execute('SELECT value FROM meta WHERE key=?', (key,)).fetchone()
+        if state:
+            window = json.loads(state['value'])
+            if window.get('window_start') and window.get('window_end'):
+                return {**cfg, '_window_start': window['window_start'], '_window_end': window['window_end']}
+    start, end = window_bounds(cfg)
+    db.execute('INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)',
+               ('manual_preview_window', json.dumps({'window_start': start, 'window_end': end})))
+    db.commit()
+    return {**cfg, '_window_start': start, '_window_end': end}
 
 
 def register_evaluation(db, cfg, limit, fallback=None):
@@ -1819,7 +1823,10 @@ def main():
             elif args.command in {'brief', 'digest', 'quality'}:
                 cfg = preview_window(db, cfg)
             if args.command == "collect":
-                collect(db, cfg, args.source)
+                start, end = collect(db, cfg, args.source)
+                db.execute('INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)',
+                           ('manual_preview_window', json.dumps({'window_start': start, 'window_end': end})))
+                db.commit()
             elif args.command == "review":
                 review(db, cfg, args.limit)
             elif args.command == "capture":

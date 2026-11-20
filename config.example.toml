@@ -2,6 +2,7 @@
 # Keep credentials outside the source directory.
 [review]
 backend = "codex"
+# Choose a model available to your authenticated Codex account.
 model = "gpt-6.1-sol"
 daily_limit = 6
 max_chars = 8000
@@ -19,6 +20,7 @@ max_catchup_days = 45
 daily_feeds = ["infoq-articles", "qbitai-articles"]
 
 [brief]
+# Total digest cap; evidence and length limits may select fewer items.
 max_items = 20
 chars_per_item = 2400
 max_input_chars = 28800
@@ -28,6 +30,7 @@ body_overhead = 100
 individual_reviews = 0
 
 [selection]
+# Per-item review settings; joint briefs use [brief].max_items.
 minimum_score = 70
 minimum_relevance = 4
 watch_minimum_score = 60
@@ -38,6 +41,7 @@ digest_hour = 9
 timezone = "Asia/Shanghai"
 
 [feishu]
+# Optional for local previews. Required for delivery and scheduling.
 webhook_url = ""
 signing_secret = ""
 keyword = "出价情报"
