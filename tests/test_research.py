@@ -24,6 +24,7 @@ def fixture(count=1, *, body_limit=2000, item_limit=20):
                  {"technology": 2, "evidence": 3, "industrial": 3, "business": 5, "technical_fit": 3, "transfer": 1}.items()}
         cards.append({"id": key, "title": f"虚构{n}", "change_type": "first_seen", "lane": "main",
                       "technology": "条件扩散出价", "outcome": "离线成本下降", "boundary": "作者报告",
+                      "why_read": "借鉴出价轨迹生成",
                       "quality": 8, "relevance": 9, "score_basis": basis,
                       "evidence": [{"id": key, "quote": "采用条件扩散", "claim": "technology"},
                                    {"id": key, "quote": "离线成本下降", "claim": "outcome"}]})
@@ -71,19 +72,60 @@ class BriefTests(unittest.TestCase):
     def test_card_reads_as_sentences_and_names_both_scores(self):
         result, inputs, coverage = fixture()
         lines, _ = research.render(result, inputs, coverage)
-        card = lines[0]
-        self.assertEqual(len(card.splitlines()), 3)
+        card = next(line for line in lines if line.startswith("1. "))
+        self.assertEqual(len(card.splitlines()), 4)
         self.assertIn("条件扩散出价。离线成本下降。作者报告。", card)
         self.assertIn("含金量8/10 · 相关性9/10", card)
+        self.assertIn("借鉴出价轨迹生成。", card)
         for shorthand in ("技：", "果：", "；含", " 相9"):
             self.assertNotIn(shorthand, card)
 
     def test_sentence_punctuation_is_not_duplicated(self):
         result, inputs, coverage = fixture()
-        result["cards"][0].update(technology="条件扩散出价。", outcome="离线成本下降！")
+        result["cards"][0].update(technology="条件扩散出价。", outcome="离线成本下降！", why_read="借鉴轨迹生成！")
         lines, _ = research.render(result, inputs, coverage)
-        self.assertNotIn("。。", lines[0])
-        self.assertNotIn("！。", lines[0])
+        card = next(line for line in lines if line.startswith("1. "))
+        self.assertNotIn("。。", card)
+        self.assertNotIn("！。", card)
+
+    def test_reading_value_is_required_and_cannot_be_empty_praise(self):
+        for value in ("", "  ", "。", "值得关注", "很有价值", "对工作有帮助"):
+            with self.subTest(value=value):
+                result, inputs, _ = fixture()
+                result["cards"][0]["why_read"] = value
+                with self.assertRaises(ValueError):
+                    research.validate_brief(result, inputs)
+        schema = json.loads(Path(research.__file__).with_name("brief.schema.json").read_text())
+        self.assertIn("why_read", schema["properties"]["cards"]["items"]["required"])
+
+    def test_fresh_reading_precedes_old_discovery_even_if_old_score_is_high(self):
+        result, inputs, coverage = fixture(3, item_limit=2)
+        result["cards"][0]["change_type"] = "old_discovery"
+        inputs["records"][0].update(published="2025-10-01", novelty={"allowed_types": ["old_discovery"]})
+        result["cards"][2]["lane"] = "watch"
+        result["triage"][2]["decision"] = "watch"
+        lines, ids = research.render(result, inputs, coverage)
+        self.assertEqual(ids, ["1", "2"])
+        self.assertLess(lines.index("## 重点阅读"), lines.index("## 值得跟进"))
+        self.assertNotIn("## 旧文补读", lines)
+
+    def test_period_takeaway_comes_first_without_claiming_industry_consensus(self):
+        result, inputs, coverage = fixture(2)
+        result["observations"] = [{"conclusion": "两项方法都使用轨迹生成，尚未比较效果", "cross_company": False,
+                                   "evidence": [{"id": "0", "quote": "采用条件扩散"},
+                                                {"id": "1", "quote": "采用条件扩散"}]}]
+        lines, _ = research.render(result, inputs, coverage)
+        self.assertEqual(lines[0], "## 本期看点")
+        self.assertLess(lines.index("## 本期看点"), lines.index("## 重点阅读"))
+        self.assertEqual("\n".join(lines).count("两项方法都使用轨迹生成"), 1)
+
+    def test_watch_only_digest_does_not_display_a_main_recommendation_heading(self):
+        result, inputs, coverage = fixture()
+        result["cards"][0]["lane"] = "watch"
+        result["triage"][0]["decision"] = "watch"
+        lines, _ = research.render(result, inputs, coverage)
+        self.assertIn("## 值得跟进", lines)
+        self.assertNotIn("## 重点阅读", lines)
 
     def test_overlong_card_is_rejected_not_sliced(self):
         result, inputs, _ = fixture()
@@ -146,8 +188,9 @@ class BriefTests(unittest.TestCase):
         inputs["records"][0]["novelty"]["allowed_types"] = ["old_discovery"]
         inputs["records"][0]["published"] = "2025-10-01T00:00:00Z"
         lines, _ = research.render(result, inputs, coverage)
-        self.assertIn("旧文补读(2025-10)", lines[0])
-        self.assertLessEqual(research.visible_chars(lines[0]), 100)
+        card = next(line for line in lines if line.startswith("1. "))
+        self.assertIn("旧文补读(2025-10)", card)
+        self.assertLessEqual(research.visible_chars(card), 100)
 
     def test_same_study_does_not_support_joint_observation(self):
         result, inputs, _ = fixture(2)

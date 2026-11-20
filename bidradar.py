@@ -1345,8 +1345,12 @@ def research_digest(db, cfg, cached):
     lines, ids, _ = brief_layout(db, cfg, result, inputs, records)
     start, end = window_bounds(cfg)
     title = safe_text(cfg["feishu"].get("keyword", "出价情报"), 30) + " · " + local_day(cfg)
-    header = (f"{display_date(start,cfg)}—{display_date(end,cfg)} · 本期推荐{len(ids)}篇\n"
-              "评分满分10分；结果来自作者报告，尚未独立复现。")
+    shown = [card for card in result["cards"] if card["id"] in ids]
+    old = sum(card["change_type"] == "old_discovery" for card in shown)
+    watch = sum(card["lane"] == "watch" and card["change_type"] != "old_discovery" for card in shown)
+    main = len(shown) - old - watch
+    header = (f"{display_date(start,cfg)}—{display_date(end,cfg)} · {len(ids)}篇（重点{main} · 跟进{watch} · 补读{old}）\n"
+              "评分满分10分；结果为作者报告，未经独立复现。")
     errors = source_issues(db, cfg, errors_only=True)
     if errors:
         header += f"\n{len(errors)}个来源暂不可用，本期覆盖不完整。"

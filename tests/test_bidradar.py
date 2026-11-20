@@ -325,6 +325,15 @@ class RuntimeTests(unittest.TestCase):
         self.assertIn("含金量8/10", markdown)
         self.assertNotIn("技：", markdown)
 
+    def test_digest_header_counts_only_visible_reading_categories(self):
+        self.result["cards"][0]["lane"] = "watch"
+        self.result["triage"][0]["decision"] = "watch"
+        payload, ids, _ = bidradar.research_digest(self.db, self.cfg, (self.result, self.inputs, []))
+        header = payload["content"]["post"]["zh_cn"]["content"][0][0]["text"]
+        self.assertIn("1篇（重点0 · 跟进1 · 补读0）", header)
+        self.assertNotIn("本期推荐1篇", header)
+        self.assertEqual(ids, ["0"])
+
     def test_markdown_title_at_item_limit_matches_feishu_visible_length(self):
         card = self.result["cards"][0]
         card["title"] = "**虚构**"
@@ -335,9 +344,11 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual(quality["item_chars"], [100])
         with patch.object(research, "selection_appendix", return_value=[]):
             payload, _, _ = bidradar.research_digest(self.db, self.cfg, (self.result, self.inputs, []))
-        paragraphs = payload["content"]["post"]["zh_cn"]["content"][1:4]
+        content = payload["content"]["post"]["zh_cn"]["content"]
+        first = next(n for n, p in enumerate(content) if any(node["tag"] == "a" for node in p))
+        paragraphs = content[first:first + 4]
         visible = "\n".join("".join(node["text"] for node in p) for p in paragraphs)
-        self.assertEqual(visible, research.visible_text(lines[0]))
+        self.assertEqual(visible, research.visible_text(next(line for line in lines if line.startswith("1. "))))
         self.assertEqual(len(visible), 100)
         anchor = next(node for paragraph in paragraphs for node in paragraph if node["tag"] == "a")
         self.assertEqual(anchor["text"], "虚构")

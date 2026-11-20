@@ -22,6 +22,7 @@
           "technology",
           "outcome",
           "boundary",
+          "why_read",
           "quality",
           "relevance",
           "score_basis",
@@ -258,6 +259,11 @@
             },
             "maxItems": 8,
             "minItems": 2
+          },
+          "why_read": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 22
           }
         }
       },
