@@ -1,0 +1,138 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "summary",
+    "topic",
+    "decision",
+    "scores",
+    "claims",
+    "limitations",
+    "connection",
+    "next_step",
+    "research_card"
+  ],
+  "properties": {
+    "summary": {
+      "type": "string"
+    },
+    "topic": {
+      "type": "string",
+      "enum": [
+        "generative_bidding",
+        "bidding_agent",
+        "budget_control",
+        "feedback_calibration",
+        "ads_product",
+        "other"
+      ]
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "read",
+        "watch",
+        "skip"
+      ]
+    },
+    "scores": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relevance",
+        "novelty",
+        "evidence",
+        "reproducibility",
+        "usefulness"
+      ],
+      "properties": {
+        "relevance": {
+          "type": "integer"
+        },
+        "novelty": {
+          "type": "integer"
+        },
+        "evidence": {
+          "type": "integer"
+        },
+        "reproducibility": {
+          "type": "integer"
+        },
+        "usefulness": {
+          "type": "integer"
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim",
+          "support_quote"
+        ],
+        "properties": {
+          "claim": {
+            "type": "string"
+          },
+          "support_quote": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "connection": {
+      "type": "string"
+    },
+    "next_step": {
+      "type": "string"
+    },
+    "research_card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "problem",
+        "method_delta",
+        "baseline",
+        "assumptions",
+        "validation"
+      ],
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "bid_policy",
+            "research_agent",
+            "ads_model",
+            "auction",
+            "ads_product",
+            "other"
+          ]
+        },
+        "problem": {
+          "type": "string"
+        },
+        "method_delta": {
+          "type": "string"
+        },
+        "baseline": {
+          "type": "string"
+        },
+        "assumptions": {
+          "type": "string"
+        },
+        "validation": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

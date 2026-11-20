@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+.env*
+config.local.*
+config.toml
+auth.json
+credentials.json
+*.key
+*.pem
+*.sqlite*
+*.log
+.DS_Store

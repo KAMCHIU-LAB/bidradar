@@ -1,0 +1,176 @@
+# Copy to ~/.config/bidradar/config.toml (permissions 600).
+# Keep credentials outside the source directory.
+[review]
+backend = "codex"
+model = "gpt-6.1-sol"
+daily_limit = 6
+max_chars = 8000
+timeout_seconds = 240
+lookback_days = 15
+
+[schedule]
+interval_days = 15
+hour = 9
+retry_days = 2
+max_catchup_days = 45
+
+[capture]
+# Daily public RSS caching only. Model review and delivery remain every 15 days.
+daily_feeds = ["infoq-articles", "qbitai-articles"]
+
+[brief]
+max_items = 20
+chars_per_item = 2400
+max_input_chars = 28800
+max_chars_per_item = 100
+max_body_chars = 2000
+body_overhead = 100
+individual_reviews = 0
+
+[selection]
+minimum_score = 70
+minimum_relevance = 4
+watch_minimum_score = 60
+watch_max_age_days = 15
+max_watch_items = 1
+max_digest_items = 3
+digest_hour = 9
+timezone = "Asia/Shanghai"
+
+[feishu]
+webhook_url = ""
+signing_secret = ""
+keyword = "出价情报"
+
+[[sources]]
+id = "arxiv-bidding"
+kind = "arxiv"
+query = '(ti:"auto-bidding" OR ti:autobidding OR ti:"generative bidding" OR (ti:bidding AND (abs:advertising OR abs:advertisement)) OR (ti:pacing AND abs:advertising))'
+limit = 100
+
+[[sources]]
+id = "arxiv-feedback"
+kind = "arxiv"
+query = '((ti:"delayed feedback" OR ti:"conversion rate" OR ti:"conversion value") AND (abs:advertising OR abs:advertisement))'
+limit = 60
+
+[[sources]]
+id = "arxiv-industry"
+kind = "arxiv"
+# Company names are search terms, not verified author affiliations. Global bidding search above is independent.
+query = '((all:Tencent OR all:ByteDance OR all:Douyin OR all:TikTok OR all:Kuaishou OR all:Meituan OR all:Alimama) AND (abs:advertising OR abs:advertisement OR ti:bidding OR ti:"conversion rate" OR ti:"delayed feedback"))'
+limit = 100
+max_pages = 3
+
+# Curated first-party repositories: no API token; commit timestamps are not paper publication dates.
+# kuaishou-tech's SegmentFault RSS was removed after repeated HTTP 468 responses.
+[[sources]]
+id = "alimama-public"
+kind = "github_curated"
+publisher = "阿里妈妈公开研究仓库（alimama-tech）"
+repos = [
+  { name = "alimama-tech/ISGE", ref = "main", readme = "README.md" },
+  { name = "alimama-tech/AuctionNet", ref = "main", readme = "README.md" },
+  { name = "alimama-tech/NeurIPS_Auto_Bidding_AIGB_Track_Baseline", ref = "main", readme = "README.md" },
+  { name = "alimama-tech/NeurIPS_Auto_Bidding_General_Track_Baseline", ref = "main", readme = "README.md" },
+  { name = "alimama-tech/OnlineGMV", ref = "main", readme = "README.md" },
+  { name = "alimama-tech/NetCVR", ref = "main", readme = "README.md" },
+]
+
+[[sources]]
+id = "kuaishou-research"
+kind = "github_curated"
+publisher = "快手研究资源（ksRecoTech/Kuai-RL，仓库含 kuaishou.com 联系方式）"
+repos = [{ name = "ksRecoTech/Kuai-RL", ref = "main", readme = "README.md" }]
+
+[[sources]]
+id = "meituan-tech"
+kind = "feed"
+url = "https://tech.meituan.com/rss.xml"
+publisher = "美团技术团队"
+provenance = "官方技术博客订阅"
+
+[[sources]]
+id = "tencent-ads-research"
+kind = "github_curated"
+publisher = "腾讯广告算法大赛公开基线仓库"
+repos = [{ name = "TencentAdvertisingAlgorithmCompetition/baseline_2025", ref = "main", readme = "README_CN.md" }]
+
+[[sources]]
+id = "bytedance-public"
+kind = "github_curated"
+publisher = "字节跳动公开仓库（bytedance）"
+# Recommendation infrastructure context; this is not a company-wide article feed.
+repos = [{ name = "bytedance/monolith", ref = "master", readme = "README.md" }]
+
+[[sources]]
+id = "google-ads-official"
+kind = "feed"
+url = "https://developers.google.com/ads/blog/rss.xml"
+publisher = "Google Ads Developer Blog"
+provenance = "官方产品/API 博客；产品公告不能替代算法效果证据"
+
+[[sources]]
+id = "alimama-articles"
+kind = "baai_author"
+author_id = 74146
+max_pages = 6
+article_limit = 12
+
+[[sources]]
+id = "tencent-articles"
+kind = "baai_search"
+queries = ["Tencent"]
+required_terms = ["Tencent", "腾讯广告", "腾讯营销"]
+max_pages = 6
+article_limit = 12
+
+[[sources]]
+id = "bytedance-articles"
+kind = "baai_search"
+queries = ["ByteDance", "Douyin"]
+required_terms = ["ByteDance", "字节", "巨量引擎", "Douyin", "抖音"]
+max_pages = 6
+article_limit = 12
+
+[[sources]]
+id = "industry-bidding-articles"
+kind = "baai_search"
+queries = ["bidding", "AIGB", "autobidding"]
+max_pages = 6
+article_limit = 12
+
+[[sources]]
+id = "industry-feedback-articles"
+kind = "baai_search"
+queries = ["CVR", "ROAS"]
+max_pages = 6
+article_limit = 12
+
+[[sources]]
+id = "infoq-articles"
+kind = "feed"
+url = "https://www.infoq.cn/feed"
+publisher = "InfoQ 中文站"
+provenance = "媒体/社区文章订阅；区分作者分享、采访和转载；非独立实验验证"
+
+[[sources]]
+id = "qbitai-articles"
+kind = "feed"
+url = "https://www.qbitai.com/feed"
+publisher = "量子位"
+provenance = "行业媒体文章订阅；报道与合作宣传不能替代原论文或实验"
+
+[[sources]]
+id = "meta-engineering"
+kind = "feed"
+url = "https://engineering.fb.com/feed/"
+publisher = "Meta Engineering"
+provenance = "官方工程技术博客；效果为作者报告，未独立复现"
+
+[[sources]]
+id = "google-research-articles"
+kind = "feed"
+url = "https://research.google/blog/rss/"
+publisher = "Google Research"
+provenance = "官方研究博客；仅保留与广告出价/反馈相关的文章"

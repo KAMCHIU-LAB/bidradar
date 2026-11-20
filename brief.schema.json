@@ -1,0 +1,402 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "cards",
+    "company_findings",
+    "observations",
+    "caveat",
+    "triage"
+  ],
+  "properties": {
+    "cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "change_type",
+          "lane",
+          "technology",
+          "outcome",
+          "boundary",
+          "quality",
+          "relevance",
+          "score_basis",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "change_type": {
+            "type": "string",
+            "enum": [
+              "new_research",
+              "new_experiments",
+              "code_release",
+              "old_discovery",
+              "repost_update",
+              "first_seen"
+            ]
+          },
+          "lane": {
+            "type": "string",
+            "enum": [
+              "main",
+              "watch"
+            ]
+          },
+          "technology": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 70
+          },
+          "outcome": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 70
+          },
+          "boundary": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 35
+          },
+          "quality": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 10
+          },
+          "relevance": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "score_basis": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "technology",
+              "evidence",
+              "industrial",
+              "business",
+              "technical_fit",
+              "transfer"
+            ],
+            "properties": {
+              "technology": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "score",
+                  "reason"
+                ],
+                "properties": {
+                  "score": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 3
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              },
+              "evidence": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "score",
+                  "reason"
+                ],
+                "properties": {
+                  "score": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 4
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              },
+              "industrial": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "score",
+                  "reason"
+                ],
+                "properties": {
+                  "score": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 3
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              },
+              "business": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "score",
+                  "reason"
+                ],
+                "properties": {
+                  "score": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 5
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              },
+              "technical_fit": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "score",
+                  "reason"
+                ],
+                "properties": {
+                  "score": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 3
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              },
+              "transfer": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "score",
+                  "reason"
+                ],
+                "properties": {
+                  "score": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                }
+              }
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "quote",
+                "claim"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "claim": {
+                  "type": "string",
+                  "enum": [
+                    "technology",
+                    "outcome",
+                    "boundary",
+                    "score",
+                    "change"
+                  ]
+                }
+              }
+            },
+            "maxItems": 8,
+            "minItems": 2
+          }
+        }
+      },
+      "maxItems": 100
+    },
+    "company_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "company",
+          "conclusion",
+          "evidence"
+        ],
+        "properties": {
+          "company": {
+            "type": "string",
+            "enum": [
+              "alimama",
+              "kuaishou",
+              "meituan",
+              "tencent",
+              "bytedance",
+              "meta",
+              "google"
+            ]
+          },
+          "conclusion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "quote"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                }
+              }
+            },
+            "maxItems": 8,
+            "minItems": 1
+          }
+        }
+      },
+      "maxItems": 7
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "conclusion",
+          "cross_company",
+          "evidence"
+        ],
+        "properties": {
+          "conclusion": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 45
+          },
+          "cross_company": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "quote"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "quote": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                }
+              }
+            },
+            "maxItems": 8,
+            "minItems": 2
+          }
+        }
+      },
+      "maxItems": 2
+    },
+    "caveat": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "triage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "decision",
+          "reason"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "include",
+              "watch",
+              "defer"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 70
+          }
+        }
+      }
+    }
+  }
+}
