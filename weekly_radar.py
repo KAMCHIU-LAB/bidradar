@@ -6,9 +6,12 @@ Independent of private config, model calls, database, and Feishu delivery.
 from __future__ import annotations
 
 import argparse
+import base64
 from concurrent.futures import ThreadPoolExecutor
 import datetime as dt
 import fcntl
+import hashlib
+import hmac
 import json
 import os
 from pathlib import Path
@@ -193,6 +196,30 @@ def markdown(rows, statuses, start, end):
     return '\n'.join(lines) + '\n'
 
 
+def send_feishu(report, webhook, secret):
+    """Send the generated public-source digest without exposing webhook details."""
+    parsed = urllib.parse.urlsplit(webhook)
+    if parsed.scheme != 'https' or parsed.hostname != 'open.feishu.cn' or not parsed.path.startswith('/open-apis/bot/v2/hook/'):
+        raise ValueError('invalid_feishu_webhook')
+    timestamp = str(int(dt.datetime.now(dt.timezone.utc).timestamp()))
+    signature = base64.b64encode(hmac.new((timestamp + '\n' + secret).encode(), b'', hashlib.sha256).digest()).decode()
+    text = report.read_text(encoding='utf-8')
+    if len(text) > 18000:
+        text = text[:17980] + '\n\n（消息过长，完整报告请下载 GitHub Actions 制品。）'
+    code, _, raw = curl_request(webhook, headers={'Content-Type': 'application/json'},
+                                body={'msg_type': 'text', 'content': {'text': text},
+                                      'timestamp': timestamp, 'sign': signature})
+    if code != 200:
+        raise ValueError('feishu_http_' + str(code))
+    try:
+        response = json.loads(raw)
+    except (ValueError, UnicodeDecodeError):
+        raise ValueError('feishu_invalid_response') from None
+    if response.get('code') != 0:
+        raise ValueError('feishu_api_error_' + str(response.get('code', 'unknown')))
+    print('飞书周报已发送。', flush=True)
+
+
 def run(output):
     end = dt.datetime.now(dt.timezone.utc)
     start = end - dt.timedelta(days=7)
@@ -245,6 +272,7 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--install-schedule', action='store_true')
     group.add_argument('--remove-schedule', action='store_true')
+    parser.add_argument('--send-feishu', action='store_true', help='send using FEISHU_WEBHOOK_URL and FEISHU_SIGNING_SECRET')
     parser.add_argument('--output', type=Path, default=OUTPUT)
     args = parser.parse_args()
     if args.install_schedule or args.remove_schedule:
@@ -257,7 +285,15 @@ def main():
         except BlockingIOError:
             print('已有采集任务运行，跳过本次。')
             return 0
-        return run(args.output)
+        result = run(args.output)
+        if args.send_feishu:
+            webhook = os.environ.get('FEISHU_WEBHOOK_URL', '')
+            secret = os.environ.get('FEISHU_SIGNING_SECRET', '')
+            if not webhook or not secret:
+                raise SystemExit('飞书 Secrets 未配置。')
+            latest = json.loads((STATE / 'latest.json').read_text(encoding='utf-8'))
+            send_feishu(Path(latest['report']), webhook, secret)
+        return result
 
 
 if __name__ == '__main__':

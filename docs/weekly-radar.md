@@ -6,7 +6,7 @@
 
 仓库公开时，GitHub 标准 hosted runner 执行 Actions 工作流免费；工作流位于 `.github/workflows/weekly-radar.yml`。每周一北京时间09:00运行，可在仓库的 **Actions → Weekly AI Radar** 查看状态并下载 `ai-weekly-radar-*` 报告制品。制品保留90天。首次部署后可在该页面通过 **Run workflow** 手动触发一次。
 
-无需 GitHub token、飞书凭证或账户 Secrets。工作流仅需读取仓库代码并上传本次生成的 Markdown 制品；报告不会提交到仓库。下载制品需要登录并拥有仓库读取权限。定时事件可能在 GitHub 高负载时延迟；公开仓库如果60天没有活动，GitHub 会自动禁用定时工作流。原始资料仅传给 runner 临时处理，周报作为制品保留90天。
+工作流会把周报发到飞书，并把 Markdown 报告保存为可下载制品；报告不会提交到仓库。需在仓库 Settings → Secrets and variables → Actions 添加 `FEISHU_WEBHOOK_URL` 和 `FEISHU_SIGNING_SECRET` 两个 Actions Secrets，值取自个人飞书自定义机器人配置。Secrets 只注入发送步骤，不写进代码或日志。下载制品需要登录并拥有仓库读取权限。定时事件可能在 GitHub 高负载时延迟；公开仓库如果60天没有活动，GitHub 会自动禁用定时工作流。周报作为制品保留90天。
 
 云端任务开始工作后，若不希望本机重复运行，在 Mac 项目目录运行：
 

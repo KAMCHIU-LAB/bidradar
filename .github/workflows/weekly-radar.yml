@@ -27,7 +27,10 @@ jobs:
           python-version: '3.12'
 
       - name: Generate weekly reading queue
-        run: python weekly_radar.py --output weekly-reports
+        run: python weekly_radar.py --output weekly-reports --send-feishu
+        env:
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          FEISHU_SIGNING_SECRET: ${{ secrets.FEISHU_SIGNING_SECRET }}
 
       - name: Upload the report
         if: ${{ always() && hashFiles('weekly-reports/*.md') != '' }}
