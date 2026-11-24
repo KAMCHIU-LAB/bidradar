@@ -1,0 +1,39 @@
+name: Weekly AI Radar
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+      timezone: Asia/Shanghai
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-ai-radar
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out default branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate weekly reading queue
+        run: python weekly_radar.py --output weekly-reports
+
+      - name: Upload the report
+        if: ${{ always() && hashFiles('weekly-reports/*.md') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-weekly-radar-${{ github.run_number }}
+          path: weekly-reports/*.md
+          if-no-files-found: error
+          retention-days: 90
