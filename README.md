@@ -1,16 +1,29 @@
 # BidRadar
 
-**给广告算法工程师的研究订阅与阅读筛选工具。**
+**面向广告出价算法工程师的研究与 AI 实践雷达。**
 
-把公开论文、技术文章和代码更新整理成短简报：**用了什么方法、得到什么结果、证据到哪一步、值得借鉴什么。** 本地预览后，可推送到个人飞书群。
+把分散的论文、工业实践和工具更新变成有重点、有出处、能验证的阅读队列。帮助你更快判断：**方法改了什么、实验支持什么结论、证据还缺什么、下一步值得试什么。**
 
-Research digests for advertising engineers: public papers, engineering posts and code updates, with source links and evidence boundaries.
+[![Weekly AI Radar](https://github.com/KAMCHIU-LAB/bidradar/actions/workflows/weekly-radar.yml/badge.svg)](https://github.com/KAMCHIU-LAB/bidradar/actions/workflows/weekly-radar.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-[查看简报样例](examples/brief.md) · [快速开始](#快速开始) · [运行与排障](docs/operations.md) · [实现与取舍](docs/engineering.md)
+Research and AI practice radar for advertising bidding engineers. Tracks papers, industrial work, coding tools, and model updates with source links and evidence limits.
 
-另有[每周 AI 雷达](docs/weekly-radar.md)：覆盖出价算法、AI 开发工具与模型进展，生成本地阅读队列，不消耗模型额度。可独立设置每周一09:00运行。
+[看一份简报样例](examples/brief.md) · [快速开始](#快速开始) · [每周 AI 雷达](docs/weekly-radar.md) · [运行与排障](docs/operations.md)
 
-Python 3.11+ · Python标准库 · Codex CLI · 飞书可选 · macOS日常运行
+## 两种使用方式
+
+| | 研究简报 | 每周 AI 雷达 |
+|---|---|---|
+| 关注内容 | 出价、预算约束、CVR、延迟反馈、广告 Agent | 出价算法、AI 编程工具、模型与推理新进展 |
+| 如何整理 | Codex 提炼与独立复审，按证据和工作相关性筛选 | 关键词规则初筛，保留日期、原文和采集状态 |
+| 如何运行 | 手动生成；macOS 每15天自动处理 | GitHub Actions 每周一北京时间09:00云端运行 |
+| 阅读结果 | 本地预览；配置后可发个人飞书群 | 飞书简报和可下载的 Markdown 制品 |
+| 模型成本 | 需要已登录的 Codex，可用额度内运行 | 不调用模型，不消耗模型额度 |
+
+简报关注研究证据；雷达关注持续发现。**两者都保留原始链接与判断边界，不把预印本、离线指标或厂商演示包装成已验证的线上效果。**
+
+Python 3.11+ · Python标准库 · Codex CLI（仅研究简报需要）· 飞书可选
 
 ## 适合怎样的日常工作
 
@@ -21,7 +34,7 @@ Python 3.11+ · Python标准库 · Codex CLI · 飞书可选 · macOS日常运�
 | 广告Agent与工程实践 | 工具调用、执行验收和故障处理有哪些可借鉴做法 |
 | 多家公司发布的新资料 | 分别总结可核查发现，再给有依据的联合观察 |
 
-内置主题面向广告出价。适合先把分散资料变成一个有限的阅读队列，再挑值得深入的原文。
+内置主题聚焦广告出价。它是个人研究工作流，不追求收录所有 AI 新闻；目标是缩短发现到验证的距离，并留下可复查的依据。
 
 ## 先看输出
 
@@ -88,13 +101,25 @@ python3 bidradar.py notify-check      # 向机器人发送一次连接确认
 python3 bidradar.py digest --send     # 发送已通过复审的简报
 ```
 
-### 4. 按周期自动跟进（macOS，可选）
+### 4. 配置本机研究简报的周期推送（macOS，可选）
 
 ```sh
 python3 bidradar.py install-schedule
 ```
 
 需先完成飞书连接确认。默认每天09:00检查周期，并缓存InfoQ、量子位的短RSS；**每15天集中采集、审阅、推送一次**。AI处理后送达，睡眠或断网可能延迟执行。电脑保持唤醒时可锁屏运行，程序不修改电源设置。
+
+### 5. 运行每周 AI 雷达
+
+公开仓库已配置 GitHub Actions，自动在每周一北京时间09:00采集并向飞书推送。云端发送需要仓库设置中的 `FEISHU_WEBHOOK_URL` 与 `FEISHU_SIGNING_SECRET` 两项 Actions Secrets。查看 [Weekly AI Radar 工作流](https://github.com/KAMCHIU-LAB/bidradar/actions/workflows/weekly-radar.yml) 可下载最近90天的报告。
+
+想在本机立即生成一份，不用 Codex 或飞书配置：
+
+```sh
+python3 weekly_radar.py
+```
+
+完整来源范围、筛选方法与覆盖限制见[每周雷达说明](docs/weekly-radar.md)。
 
 ## 调整阅读节奏
 
