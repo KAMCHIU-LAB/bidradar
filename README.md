@@ -8,6 +8,8 @@ Research digests for advertising engineers: public papers, engineering posts and
 
 [查看简报样例](examples/brief.md) · [快速开始](#快速开始) · [运行与排障](docs/operations.md) · [实现与取舍](docs/engineering.md)
 
+另有[每周 AI 雷达](docs/weekly-radar.md)：覆盖出价算法、AI 开发工具与模型进展，生成本地阅读队列，不消耗模型额度。可独立设置每周一09:00运行。
+
 Python 3.11+ · Python标准库 · Codex CLI · 飞书可选 · macOS日常运行
 
 ## 适合怎样的日常工作
